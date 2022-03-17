@@ -1,0 +1,36 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TestTaskBrio</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500&display=swap">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="https://use.fontawesome.com/1d9fd44359.js"></script>
+    <link rel="stylesheet" href="~/css/Animate.css">
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+
+    <div class="wrapper">
+        <nav class="nav_wrapper">
+            <i class="fa fa-cog" aria-hidden="true"></i>
+            <div class="nav__content">
+            </div>
+        </nav>
+        <div id="overlay"></div>
+        <div class="main-container">
+            <div class="main" role="main">
+                @RenderBody()
+            </div>
+        </div>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="module" src='@Url.Content("~/js/app.js")'></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
