@@ -1,4 +1,6 @@
-﻿
+﻿import { Point } from "./Point.js"
+import { MovingObject } from "./MovingObject.js"
+
 window.onload = () => {
     var wrapper = document.getElementById("canvas-wrapper")
     var canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -8,73 +10,48 @@ window.onload = () => {
     ctx.imageSmoothingEnabled = false;
     let direction: number; //направление
     let pointsArry: Point[] = [];
+    let currentPoint: Point;
     let movingObject: MovingObject;
 
 
     canvas.onmousedown = function (event) {
         var point = new Point(ctx, event.offsetX, event.offsetY, 10);
-        pointsArry.push(point);
-        point.drawPoint();
+        currentPoint = point;
+        pointsArry.push(currentPoint);
+        currentPoint.drawPoint();
 
         if (pointsArry.length > 1) {
+            currentPoint.previouspoint = pointsArry[pointsArry.length - 2];
             Move();
         }
 
         if (pointsArry.length == 1) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            var x = event.offsetX - 4;
-            var y = event.offsetY - 4;
-            ctx.fillRect(x, y, 8, 8);
-            ctx.beginPath();
-
+            movingObject = new MovingObject(ctx, event.offsetX, event.offsetY, 8, 8);
+            movingObject.draw();
         }
+
+        movingObject.dx = (movingObject.x - currentPoint.x) / 200 * -1;
+        movingObject.dy = (movingObject.y - currentPoint.y) / 200 * -1;
     }
 
     function Move() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < pointsArry.length; i++) {
+            pointsArry[i].drawPoint();
+        }
+        movingObject.draw();
+        var shouldMove = Math.abs(movingObject.x - currentPoint.x) > 1 ||
+            Math.abs(movingObject.y - currentPoint.y) > 1;
+
+        if (shouldMove) {
+            movingObject.x += movingObject.dx;
+            movingObject.y += movingObject.dy;
+        } else {
+            movingObject.dx = 0;
+            movingObject.dy = 0;
+        }
         requestAnimationFrame(Move);
-       
     }
 };
 
-class MovingObject {
 
-    x: number;
-    y: number;
-    dx: number;
-    dy: number;
-    context: CanvasRenderingContext2D;
-
-    constructor(context: CanvasRenderingContext2D, x: number, y: number) {
-        this.x = x;
-        this.y = y;
-    }
-
-    Draw() {
-        
-    }
-}
-
-class Point {
-
-    x: number;
-    y: number;
-    radius: number;
-    context: CanvasRenderingContext2D;
-
-    previouspoint: Point;
-    nextPoint: Point;
-
-    constructor(context: CanvasRenderingContext2D, x: number, y: number, radius: number) {
-        this.context = context;
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-    }
-
-    drawPoint() {
-        this.context.beginPath();
-        this.context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        this.context.strokeStyle = '#5333ed';
-        this.context.stroke();
-    }
-}
