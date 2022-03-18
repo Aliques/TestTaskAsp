@@ -1,7 +1,8 @@
 var MovingObject = /** @class */ (function () {
     function MovingObject(context, x, y, dx, dy) {
-        this.dx = 0;
-        this.dy = 0;
+        this.dx = 2;
+        this.dy = 2;
+        this.direction = Direction.forward;
         this.x = x;
         this.y = y;
         this.dx = dx;
@@ -19,4 +20,9 @@ var MovingObject = /** @class */ (function () {
     return MovingObject;
 }());
 export { MovingObject };
+export var Direction;
+(function (Direction) {
+    Direction[Direction["forward"] = 0] = "forward";
+    Direction[Direction["back"] = 1] = "back";
+})(Direction || (Direction = {}));
 //# sourceMappingURL=MovingObject.js.map

@@ -1,12 +1,16 @@
-﻿export class MovingObject {
+﻿import { Point } from "./Point";
+
+export class MovingObject {
 
     x: number;
     y: number;
-    dx: number = 0;
-    dy: number = 0;
+    dx: number = 2;
+    dy: number = 2;
     width: number;
     height: number;
     context: CanvasRenderingContext2D;
+    direction: Direction = Direction.forward;
+
     constructor(context: CanvasRenderingContext2D, x, y, dx, dy,) {
         this.x = x;
         this.y = y;
@@ -34,4 +38,9 @@
     //    this.x += this.dx;
     //    this.y += this.dy;
     //}
+}
+
+export enum Direction {
+    forward,
+    back
 }

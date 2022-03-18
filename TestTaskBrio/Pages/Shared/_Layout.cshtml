@@ -16,6 +16,8 @@
         <nav class="nav_wrapper">
             <i class="fa fa-cog" aria-hidden="true"></i>
             <div class="nav__content">
+                <input type="number" min="1" max="500" value="200" id="speed" />
+                <button id="saveSettings">Save</button>
             </div>
         </nav>
         <div id="overlay"></div>
@@ -26,7 +28,7 @@
         </div>
 
     </div>
-
+   
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
