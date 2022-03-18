@@ -2,19 +2,16 @@ import { Point } from "./Point.js";
 import { MovingObject, Direction } from "./MovingObject.js";
 var wrapper = document.getElementById("canvas-wrapper");
 var canvas = document.getElementById("canvas");
+var tableBody = document.getElementById('pointsTableBody');
 window.onload = function () {
     canvas.width = wrapper.offsetWidth;
     canvas.height = wrapper.offsetHeight * 0.9;
 };
 var ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
-var direction; //направление
 var pointsArray = [];
 var currentTarget;
 var movingObject;
-var speed = 200;
-var lastTarget;
-var lastCreatedPoint = null;
 canvas.onmousedown = function (event) {
     var point = new Point(ctx, event.offsetX, event.offsetY, 10);
     pointsArray.push(point);
@@ -28,13 +25,14 @@ canvas.onmousedown = function (event) {
         movingObject.draw();
         update();
     }
+    addPointToTable(point);
     point.drawPoint();
 };
 function StartMove() {
     if (Math.abs(movingObject.x - currentTarget.x) < movingObject.dx && Math.abs(movingObject.y - currentTarget.y) < movingObject.dy) { //когда достигли цели
         movingObject.x = currentTarget.x;
         movingObject.y = currentTarget.y;
-        //то след. таргет
+        //определяем след. таргет
         changeDirection();
         chngeTarget();
     }
@@ -78,4 +76,14 @@ window.addEventListener('resize', function (event) {
     canvas.width = wrapper.offsetWidth;
     canvas.height = wrapper.offsetHeight * 0.9;
 }, true);
+function addPointToTable(point) {
+    var coordinatesCell = document.createElement('td');
+    var userNamecell = document.createElement('td');
+    var row = document.createElement('tr');
+    coordinatesCell.appendChild(document.createTextNode(point.x.toString() + " : " + point.y.toString()));
+    userNamecell.appendChild(document.createTextNode(document.getElementById('userName').value));
+    row.appendChild(coordinatesCell);
+    row.appendChild(userNamecell);
+    tableBody.appendChild(row);
+}
 //# sourceMappingURL=app.js.map
