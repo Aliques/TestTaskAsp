@@ -4,8 +4,12 @@ import { MovingObject, Direction } from "./MovingObject.js"
 
 var wrapper = document.getElementById("canvas-wrapper")
 var canvas = document.getElementById("canvas") as HTMLCanvasElement;
-canvas.width = wrapper.offsetWidth;
-canvas.height = wrapper.offsetHeight;
+
+window.onload = function () {
+    canvas.width = wrapper.offsetWidth;
+    canvas.height = wrapper.offsetHeight*0.9;
+};
+
 var ctx = canvas.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 let direction: number; //направление
@@ -24,9 +28,6 @@ canvas.onmousedown = function (event) {
     if (pointsArray.length>1) {
         pointsArray[pointsArray.length - 2].nextPoint = point;
         point.previouspoint = pointsArray[pointsArray.length - 2];
-        //currentTarget.previouspoint = currentTarget;
-        //currentTarget.nextPoint = point;
-        //currentTarget = point;
     }
 
     if (pointsArray.length == 2) {
@@ -90,9 +91,7 @@ function update() {
     requestAnimationFrame(update);
 }
 
-
-//function sendPontToListeners() {
-//    const hubConnection = new signalR.HubConnectionBuilder()
-//        .withUrl("/")
-//        .build();
-//}
+window.addEventListener('resize', function (event) {
+    canvas.width = wrapper.offsetWidth;
+    canvas.height = wrapper.offsetHeight*0.9;
+}, true);
