@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using TestTaskBrio.Infrastructure.Data;
 
 namespace TestTaskBrio
 {
@@ -42,12 +43,16 @@ namespace TestTaskBrio
             }
 
             app.UseHttpsRedirection();
+            app.UseDefaultFiles();
             app.UseStaticFiles();
-            
+
 
             app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHub<AppHub>("/points");
+            });
 
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

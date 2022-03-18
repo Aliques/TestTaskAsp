@@ -9,7 +9,7 @@
         "module": "ES2015",
         "outDir": "wwwroot/js"
     },
-    "include": [
-        "scripts/**/*"
-    ]
+    //"include": [
+    //    "scripts/**/*"
+    //]
 }

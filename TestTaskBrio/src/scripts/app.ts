@@ -89,3 +89,10 @@ function update() {
     StartMove();
     requestAnimationFrame(update);
 }
+
+
+//function sendPontToListeners() {
+//    const hubConnection = new signalR.HubConnectionBuilder()
+//        .withUrl("/")
+//        .build();
+//}
