@@ -1,0 +1,39 @@
+.nav_wrapper {
+    position: fixed;
+    display: flex;
+    justify-content: flex-start;
+    width: 45px;
+    padding: 10px 0px 0px 10px;
+    top: 0;
+    height: 100%;
+    z-index: 100;
+    background-color: #202020;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    box-shadow: 4px 7px 10px rgba(0, 0, 0, 0.4);
+    &:hover{
+        width: 400px;
+    }
+}
+.nav-content {
+    margin: 10px 10px 10px 45px;
+}
+
+#overlay {
+    position: fixed;
+    visibility: hidden;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0;
+    background-color: rgba(0,0,0,0.4);
+    -webkit-transition:all 0.3s ease;
+    transition: all 0.3s ease;
+}
+.nav_wrapper:hover + #overlay {
+    visibility: visible;
+    opacity: 1;
+}
