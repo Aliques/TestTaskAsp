@@ -5,9 +5,9 @@ namespace TestTaskBrio.Infrastructure.Data
 {
     public class AppHub : Hub
     {
-        public async Task Send(object message)
+        public async Task GetNewMarker(object message)
         {
-            await this.Clients.All.SendAsync("Send", message);
+            await this.Clients.All.SendAsync("GetNewMarker", message);
         }
     }
 }
