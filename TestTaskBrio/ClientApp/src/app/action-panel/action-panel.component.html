@@ -1,3 +1,8 @@
-<div id="canvas-wrapper"  #canvasWrapper >
+<div id="canvas-wrapper"  #canvasWrapper (window:resize)="onResize()">
+    <div class="name-container">
+        <label>Имя</label>
+        <input/>
+    </div> 
     <canvas (click)="onmousedownHandler($event)" id="canvas" #canvas></canvas>
+    <app-data-table [markers]="markersArray"></app-data-table>
 </div>

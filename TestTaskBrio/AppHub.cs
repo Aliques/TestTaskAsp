@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TestTaskBrio.Domain.Core;
 
 namespace TestTaskBrio
 {

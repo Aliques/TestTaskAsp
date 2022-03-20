@@ -4,6 +4,13 @@ canvas{
 }
 
 #canvas-wrapper{
-    height:100%;
-    
+    height:50vh;
+    width: 100%;
+}
+
+.name-container{
+    margin: 10px 0;
+    label{
+        margin-right: 10px;
+    }
 }

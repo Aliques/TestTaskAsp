@@ -1,9 +1,8 @@
 import { Component, ElementRef, OnInit, ViewChild, Input, Output, HostListener } from '@angular/core';
 import { MovingObject } from '../data/models/MovingObject';
-import { Marker, NeighborMarker } from '../data/models/Point';
+import { Marker, NeighborMarker } from '../data/models/Marker';
 import * as SignalR from "@microsoft/signalr"
 import { ICircle } from '../data/models/ICircle';
-import { LinkedList } from '../data/LinkedList';
 
 @Component({
   selector: 'app-action-panel',
@@ -24,7 +23,6 @@ export class ActionPanelComponent implements OnInit {
   markerStrokeColor: string = "#9254cd";
   movingObjSize: number = 10;
   markersRadius: number = 8;
-  list: LinkedList;
 
 
   startConnection = () => {
@@ -70,16 +68,19 @@ export class ActionPanelComponent implements OnInit {
   }
 
   constructor() { }
+  onResize() {
+    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth;
+    this.canvas.nativeElement.height = this.canvasWrapper.nativeElement.offsetHeight ;
+  }
 
   ngOnInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.startConnection();
   }
 
-
   ngAfterViewInit() {
-    // this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth;
-    // this.canvas.nativeElement.height = this.canvasWrapper.nativeElement.offsetHeight ;
+    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth;
+    this.canvas.nativeElement.height = this.canvasWrapper.nativeElement.offsetHeight ;
 
   }
 

@@ -1,0 +1,16 @@
+<div class="table-container" ng-hide="true">
+  <ul class="list-group">
+    <li>
+      <span>Id</span>
+      <span>Coordinates</span>
+      <span>Creator name</span>
+      <span>Action</span>
+    </li>
+    <li  *ngFor="let marker of markers">
+      <span>{{marker.id}}</span>
+      <span>X:{{marker.x}} - Y:{{marker.y}}</span>
+      <span class="creator-name">{{marker.creatorName}}</span>
+      <button  (click)="delete(marker.id)">Delete</button>
+    </li>
+  </ul>
+</div>
