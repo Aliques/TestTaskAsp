@@ -6,8 +6,8 @@ namespace TestTaskBrio.Domain.Interfaces
 {
     public interface IMarkerRepository
     {
-        Marker CreateMarker(Marker marker);
-        void Delete(Marker marker);
+        Task<Marker> CreateMarker(Marker marker);
+        int Delete(Marker marker);
         Task<List<Marker>> FindAllAsync();
         Task<int> SaveChangesAsync();
 

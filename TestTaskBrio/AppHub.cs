@@ -29,8 +29,8 @@ namespace TestTaskBrio
 
         public async Task DeleteMarker(Marker marker)
         {
-            _markerRepository.Delete(marker);
-            await _markerRepository.SaveChangesAsync();
+            //_markerRepository.Delete(marker);
+            //await _markerRepository.SaveChangesAsync();
             await Clients.All.SendAsync("DeleteMarker", marker);
             await base.OnConnectedAsync();
         }

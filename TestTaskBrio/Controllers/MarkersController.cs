@@ -36,15 +36,15 @@ namespace TestTaskBrio.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> Delete(Marker marker)
+        public async Task<int> Delete([FromBody]Marker marker)
         {
-             _markerRepository.Delete(marker);
+            var id =  _markerRepository.Delete(marker);
             await _markerRepository.SaveChangesAsync();
 
-            return Ok();
+            return id;
         }
 
-        [HttpDelete]
+        [HttpDelete("/all")]
         public async Task<IActionResult> DeleteAll()
         {
             var result = await _markerRepository.RemoveAll();

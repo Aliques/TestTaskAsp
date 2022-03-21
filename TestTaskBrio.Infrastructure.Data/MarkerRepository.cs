@@ -16,17 +16,20 @@ namespace TestTaskBrio.Infrastructure.Data
         {
             _repositoryContext = repositoryContext;
         }
-        public Marker CreateMarker(Marker marker)
+        public async Task<Marker> CreateMarker(Marker marker)
         {
-            //await _repositoryContext.Database.ExecuteSqlRawAsync("delete from \"Markers\" where id not in" +
-            //    "(select id from \"Markers\" order by CreationTime desc limit 10)");
+            var mark = _repositoryContext.Add(marker).Entity;
+            await _repositoryContext.Database.ExecuteSqlRawAsync("delete from \"Markers\" where \"Markers\".\"Id\" " +
+                "not in (select \"Markers\".\"Id\" from \"Markers\" order by \"Markers\".\"CreationTime\" desc limit 20)");
 
-            return _repositoryContext.Add(marker).Entity;
+            return mark;
         }
 
-        public void Delete(Marker marker)
+        public int Delete(Marker marker)
         {
+            int id = marker.Id;
             _repositoryContext.Remove(marker);
+            return id;
         }
 
         public async Task<int> RemoveAll()

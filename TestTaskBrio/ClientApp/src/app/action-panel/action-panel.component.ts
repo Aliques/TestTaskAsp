@@ -5,6 +5,7 @@ import * as SignalR from "@microsoft/signalr"
 import { ICircle } from '../data/models/ICircle';
 import { Subscription } from 'rxjs';
 import { DataTableComponent } from '../data-table/data-table.component';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-action-panel',
@@ -29,7 +30,7 @@ export class ActionPanelComponent implements OnInit {
   private subscription: Subscription;
   animationReques?:number;
   name:string;
-  constructor() { }
+  constructor(private http: HttpClient) { }
 
   startConnection = () => {
     this.hubConnection = new SignalR.HubConnectionBuilder()
@@ -65,17 +66,36 @@ export class ActionPanelComponent implements OnInit {
   }
 
   deleteMarkerListener() {
-    this.hubConnection.on("DeleteMarker", (deleted:Marker) => {
-      this.markersArray = this.markersArray.filter(m => m.id !== deleted.id);
-      if (this.markersArray.length <= 1) {
-        this.movingObject = null;
-        if (this.markersArray.length == 0) {
-          cancelAnimationFrame(this.animationReques);
-          this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-        }
-      }
-      this.restoreLinks();
-      this.refreshDataTable();
+    this.hubConnection.on("DeleteMarker", (deleted: Marker) => {
+      let id = 0;
+     this.http.delete('/Markers', { body: deleted })
+        .subscribe((result: any) => {
+          this.markersArray = this.markersArray.filter(m => m.id !== result);
+          if (this.markersArray.length <= 1) {
+            this.movingObject = null;
+            if (this.markersArray.length == 0) {
+              cancelAnimationFrame(this.animationReques);
+              this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+            }
+          }
+          this.restoreLinks();
+          this.refreshDataTable();
+        },
+          response => {
+            console.log("DELETE call in error", response);
+          });
+
+
+      //this.markersArray = this.markersArray.filter(m => m.id !== id);
+      //if (this.markersArray.length <= 1) {
+      //  this.movingObject = null;
+      //  if (this.markersArray.length == 0) {
+      //    cancelAnimationFrame(this.animationReques);
+      //    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+      //  }
+      //}
+      //this.restoreLinks();
+      //this.refreshDataTable();
     });;
   }
 
