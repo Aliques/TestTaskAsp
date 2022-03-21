@@ -13,6 +13,10 @@ export class DataTableComponent implements OnInit {
   @Input() dataSource: Marker[];
   @Output() deleteMarkerEvent = new EventEmitter<number>();
   @Output() dataSourceChange = new EventEmitter<Marker[]>();
+  @Output() tableRowSelectedEvent = new EventEmitter<Marker>();
+  @Output() tableRowUnselectedSelectedEvent = new EventEmitter<any>();
+
+  selecterMarkerId:number = 0;
 
   onDataSourceChange(dataSource: Marker[]){
          
@@ -45,9 +49,15 @@ export class DataTableComponent implements OnInit {
     this.deleteMarkerEvent.emit(id);
   }
 
-  delete(id:any){
-    
+  tableRowSelected(marker:Marker){
+    this.tableRowSelectedEvent.emit(marker);
   }
+
+  tableRowUnselected()
+  {
+    this.tableRowUnselectedSelectedEvent.emit();
+  }
+
   ngOnInit(): void {
     
   }

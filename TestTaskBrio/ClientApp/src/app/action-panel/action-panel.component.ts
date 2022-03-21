@@ -15,12 +15,13 @@ import { HttpClient } from '@angular/common/http';
 
 
 export class ActionPanelComponent implements OnInit {
-  @ViewChild(DataTableComponent) dataTableComponentInstance:DataTableComponent;
+  @ViewChild(DataTableComponent) dataTableComponentInstance: DataTableComponent;
   @ViewChild('canvasWrapper') canvasWrapper: ElementRef;
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   ctx: any;
   markersArray: Marker[] = [];
   currentTarget: Marker;
+  selectedMarker:Marker = null;
   movingObject: MovingObject;
   hubConnection: SignalR.HubConnection;
   movingObjStrokeColor: string = "#0080E7";
@@ -28,16 +29,16 @@ export class ActionPanelComponent implements OnInit {
   movingObjSize: number = 10;
   markersRadius: number = 8;
   private subscription: Subscription;
-  animationReques?:number;
-  name:string;
+  animationReques?: number;
+  name: string;
   constructor(private http: HttpClient) { }
 
   startConnection = () => {
     this.hubConnection = new SignalR.HubConnectionBuilder()
       .withUrl("https://localhost:44332/points")
       .build();
-      this.removeAllMarkers();
-      this.deleteMarkerListener();
+    this.removeAllMarkers();
+    this.deleteMarkerListener();
     this.initMarkers();
     this.newMarkerListener();
     this.hubConnection
@@ -45,14 +46,14 @@ export class ActionPanelComponent implements OnInit {
       .then(() => console.log("started"))
       .catch((err) => console.log(err));
   }
-  
+
   //Hub methods
   newMarkerListener() {
     this.hubConnection.on("GetNewMarker", (marker: Marker) => {
-      let newMarker = new Marker(marker.x, marker.y, marker.radius,marker.name, marker.id);
+      let newMarker = new Marker(marker.x, marker.y, marker.radius, marker.name, marker.id);
       this.markersArray.push(newMarker);
       this.createPoint(newMarker);
-      this.refreshDataTable();  
+      this.refreshDataTable();
     });;
   }
 
@@ -67,10 +68,11 @@ export class ActionPanelComponent implements OnInit {
 
   deleteMarkerListener() {
     this.hubConnection.on("DeleteMarker", (deleted: Marker) => {
-      let id = 0;
-     this.http.delete('/Markers', { body: deleted })
+      let id = deleted.id;
+
+      this.http.delete('/Markers', { body: deleted })
         .subscribe((result: any) => {
-          this.markersArray = this.markersArray.filter(m => m.id !== result);
+          this.markersArray = this.markersArray.filter(m => m.id !== id);
           if (this.markersArray.length <= 1) {
             this.movingObject = null;
             if (this.markersArray.length == 0) {
@@ -84,18 +86,6 @@ export class ActionPanelComponent implements OnInit {
           response => {
             console.log("DELETE call in error", response);
           });
-
-
-      //this.markersArray = this.markersArray.filter(m => m.id !== id);
-      //if (this.markersArray.length <= 1) {
-      //  this.movingObject = null;
-      //  if (this.markersArray.length == 0) {
-      //    cancelAnimationFrame(this.animationReques);
-      //    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-      //  }
-      //}
-      //this.restoreLinks();
-      //this.refreshDataTable();
     });;
   }
 
@@ -111,7 +101,7 @@ export class ActionPanelComponent implements OnInit {
     });
   }
 
-  restoreLinks(){
+  restoreLinks() {
     if (this.markersArray.length > 1) {
       for (let index = 0; index < this.markersArray.length; index++) {
         if (index !== this.markersArray.length) {
@@ -123,31 +113,31 @@ export class ActionPanelComponent implements OnInit {
   }
 
   onResize() {
-    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth*0.5;
-    this.canvas.nativeElement.height = 700 ;
+    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth * 0.5;
+    this.canvas.nativeElement.height = 700;
   }
 
   ngOnInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.startConnection();
   }
-   ngOnDestroy() {
+  ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
-  deleteMarker(number:number){
+  deleteMarker(number: number) {
     let marker = this.markersArray.filter(m => m.id === number)[0];
     this.hubConnection.invoke("DeleteMarker", marker);
   }
 
   ngAfterViewInit() {
-    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth*0.5;
-    this.canvas.nativeElement.height = 500   ;
+    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth * 0.5;
+    this.canvas.nativeElement.height = 500;
 
   }
 
   onmousedownHandler(event: MouseEvent) {
-    var marker = new Marker(event.offsetX, event.offsetY, this.markersRadius,this.name);
+    var marker = new Marker(event.offsetX, event.offsetY, this.markersRadius, this.name);
     let passMark = marker;
     passMark.nextMarker = undefined;
     this.hubConnection.invoke("GetNewMarker", passMark);
@@ -177,6 +167,7 @@ export class ActionPanelComponent implements OnInit {
     }
     this.drawCirclePoint(this.movingObject, this.movingObjStrokeColor);
     this.StartMove();
+    this.drawSelectedTableMarker();
     this.animationReques = requestAnimationFrame(this.update.bind(this));
   }
 
@@ -208,12 +199,24 @@ export class ActionPanelComponent implements OnInit {
     this.ctx.stroke();
   }
 
-  remooveAllMarkers(){
+  remooveAllMarkers() {
     this.hubConnection.invoke("RemoveAllMarkers");
   }
 
-  refreshDataTable()
-  {
+  refreshDataTable() {
     this.dataTableComponentInstance.refreshTable();
+  }
+
+  selectedTableMarker(marker:Marker){
+    this.selectedMarker = new Marker(marker.x,marker.y, 16, null,marker.id);
+  }
+
+  drawSelectedTableMarker(){
+    if(this.selectedMarker!==null)
+      this.drawCirclePoint(this.selectedMarker,"#007acc");
+  }
+
+  tableRowUnselectedSelectedEvent(){
+    this.selectedMarker = null;
   }
 }

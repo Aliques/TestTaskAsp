@@ -15,7 +15,7 @@ namespace TestTaskBrio
         }
         public async Task GetNewMarker(Marker marker)
         {
-            var createdMarker = _markerRepository.CreateMarker(marker);
+            var createdMarker = await _markerRepository.CreateMarker(marker);
             await _markerRepository.SaveChangesAsync();
             await Clients.All.SendAsync("GetNewMarker", createdMarker);
         }
