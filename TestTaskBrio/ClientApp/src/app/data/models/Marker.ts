@@ -16,13 +16,3 @@ export class Marker implements ICircle {
         this.id = id;
     }
 }
-
-export class NeighborMarker {
-    x: number;
-    y: number;
- 
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-    }
-}

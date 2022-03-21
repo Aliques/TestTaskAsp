@@ -4,5 +4,5 @@
         <input/>
     </div> 
     <canvas (click)="onmousedownHandler($event)" id="canvas" #canvas></canvas>
-    <app-data-table [markers]="markersArray"></app-data-table>
+    <app-data-table (deleteMarkerEvent)="deleteMarker($event)" [markers]="markersArray"></app-data-table>
 </div>

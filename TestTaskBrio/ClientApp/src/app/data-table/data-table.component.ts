@@ -1,7 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTable } from '@angular/material/table';
+import {  Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Marker } from '../data/models/Marker';
 
 @Component({
@@ -11,11 +8,12 @@ import { Marker } from '../data/models/Marker';
 })
 export class DataTableComponent implements OnInit {
   @Input() markers: Marker[];
-  //markers:Marker[]=[new Marker(1,2,3,"asd",4),new Marker(41,22,34,"qwe",8)]
+  @Output() deleteMarkerEvent = new EventEmitter<number>();
   constructor() {
   }
+  
   delete(id:any){
-    console.log(id) 
+    this.deleteMarkerEvent.emit(id);
   }
   ngOnInit(): void {
   }

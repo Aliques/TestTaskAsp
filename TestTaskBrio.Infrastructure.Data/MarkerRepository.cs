@@ -28,7 +28,7 @@ namespace TestTaskBrio.Infrastructure.Data
 
         public async Task<int> RemoveAll()
         {
-            return await _repositoryContext.Database.ExecuteSqlRawAsync("TRUNCATE Marker");
+            return await _repositoryContext.Database.ExecuteSqlRawAsync("TRUNCATE \"Markers\"");
         }
 
         public async Task<List<Marker>> FindAllAsync()

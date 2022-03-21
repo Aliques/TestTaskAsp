@@ -1,8 +1,9 @@
 import { Component, ElementRef, OnInit, ViewChild, Input, Output, HostListener } from '@angular/core';
 import { MovingObject } from '../data/models/MovingObject';
-import { Marker, NeighborMarker } from '../data/models/Marker';
+import { Marker } from '../data/models/Marker';
 import * as SignalR from "@microsoft/signalr"
 import { ICircle } from '../data/models/ICircle';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-action-panel',
@@ -23,51 +24,65 @@ export class ActionPanelComponent implements OnInit {
   markerStrokeColor: string = "#9254cd";
   movingObjSize: number = 10;
   markersRadius: number = 8;
+  private subscription: Subscription;
 
+  constructor() { }
 
   startConnection = () => {
     this.hubConnection = new SignalR.HubConnectionBuilder()
       .withUrl("https://localhost:44332/points")
       .build();
-    this.initPoint();
-    this.newPointsListener();
+      this.deleteMarkerListener();
+    this.initMarkers();
+    this.newMarkerListener();
     this.hubConnection
       .start()
       .then(() => console.log("started"))
       .catch((err) => console.log(err));
   }
-
+  
   //Hub methods
-  newPointsListener() {
+  newMarkerListener() {
     this.hubConnection.on("GetNewMarker", (marker: Marker) => {
-      let newMarker = new Marker(marker.x, marker.y, marker.radius);
+      let newMarker = new Marker(marker.x, marker.y, marker.radius,marker.creatorName, marker.id);
       this.markersArray.push(newMarker);
       this.createPoint(newMarker);
     });;
   }
 
-  initPoint() {
+  deleteMarkerListener() {
+    this.hubConnection.on("DeleteMarker", (deleted:Marker) => {
+      this.markersArray = this.markersArray.filter(m => m.id !== deleted.id);
+      if (this.markersArray.length <= 1) {
+        this.movingObject = null;
+      }
+      this.restoreLinks();
+    });;
+  }
+
+  initMarkers() {
     this.hubConnection.on("GetAllMarkers", (array: Marker[]) => {
       if (array.length) {
         this.markersArray = array;
         this.movingObject = new MovingObject(this.markersArray[0].x, this.markersArray[0].y, this.movingObjSize);
 
-        if (this.markersArray.length > 1) {
-          for (let index = 0; index < this.markersArray.length; index++) {
-            if (index !== this.markersArray.length) {
-              let prev = this.markersArray[index];
-              this.markersArray[index].nextMarker = this.markersArray[index + 1];
-            }
-          }
-
-          this.currentTarget = this.markersArray[0];
-        }
+        this.restoreLinks();
         this.update();
       }
     });
   }
 
-  constructor() { }
+  restoreLinks(){
+    if (this.markersArray.length > 1) {
+      for (let index = 0; index < this.markersArray.length; index++) {
+        if (index !== this.markersArray.length) {
+          this.markersArray[index].nextMarker = this.markersArray[index + 1];
+        }
+      }
+      this.currentTarget = this.markersArray[0];
+    }
+  }
+
   onResize() {
     this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth;
     this.canvas.nativeElement.height = this.canvasWrapper.nativeElement.offsetHeight ;
@@ -76,6 +91,14 @@ export class ActionPanelComponent implements OnInit {
   ngOnInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.startConnection();
+  }
+   ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  deleteMarker(number:number){
+    let marker = this.markersArray.filter(m=>m.id===number)[0];
+    this.hubConnection.invoke("DeleteMarker", marker);
   }
 
   ngAfterViewInit() {
@@ -86,8 +109,8 @@ export class ActionPanelComponent implements OnInit {
 
   onmousedownHandler(event: MouseEvent) {
     var marker = new Marker(event.offsetX, event.offsetY, this.markersRadius);
-    this.markersArray.push(marker);
-    this.createPoint(marker);
+    // this.markersArray.push(marker);
+    // this.createPoint(marker);
     let passMark = marker;
     passMark.nextMarker = undefined;
     this.hubConnection.invoke("GetNewMarker", passMark);
