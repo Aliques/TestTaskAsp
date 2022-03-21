@@ -55,6 +55,9 @@ export class ActionPanelComponent implements OnInit {
       this.markersArray = this.markersArray.filter(m => m.id !== deleted.id);
       if (this.markersArray.length <= 1) {
         this.movingObject = null;
+        if (this.markersArray.length == 0) {
+          this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+        }
       }
       this.restoreLinks();
     });;
@@ -97,7 +100,10 @@ export class ActionPanelComponent implements OnInit {
   }
 
   deleteMarker(number:number){
-    let marker = this.markersArray.filter(m=>m.id===number)[0];
+    let marker = this.markersArray.filter(m => m.id === number)[0];
+    //if (this.markersArray.indexOf(marker) == this.markersArray.length - 1) {
+    //  this.markersArray[this.markersArray.length - 2].nextMarker = undefined;
+    //}
     this.hubConnection.invoke("DeleteMarker", marker);
   }
 
@@ -119,7 +125,7 @@ export class ActionPanelComponent implements OnInit {
   createPoint = (marker: Marker) => {
     if (this.markersArray.length > 1) {
       this.markersArray[this.markersArray.length - 2].nextMarker = marker;
-      marker.nextMarker = this.markersArray[this.markersArray.length - 1];
+      //marker.nextMarker = this.markersArray[this.markersArray.length - 1];
     }
 
     if (this.markersArray.length == 2) {
