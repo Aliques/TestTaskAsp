@@ -9,6 +9,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { DataTableComponent } from './data-table/data-table.component';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule }   from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -23,6 +25,8 @@ import { DataTableComponent } from './data-table/data-table.component';
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
+    FormsModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

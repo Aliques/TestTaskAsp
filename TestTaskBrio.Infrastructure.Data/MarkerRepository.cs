@@ -18,6 +18,9 @@ namespace TestTaskBrio.Infrastructure.Data
         }
         public Marker CreateMarker(Marker marker)
         {
+            //await _repositoryContext.Database.ExecuteSqlRawAsync("delete from \"Markers\" where id not in" +
+            //    "(select id from \"Markers\" order by CreationTime desc limit 10)");
+
             return _repositoryContext.Add(marker).Entity;
         }
 

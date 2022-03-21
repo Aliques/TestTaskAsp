@@ -4,15 +4,17 @@ import { Marker } from '../data/models/Marker';
 import * as SignalR from "@microsoft/signalr"
 import { ICircle } from '../data/models/ICircle';
 import { Subscription } from 'rxjs';
+import { DataTableComponent } from '../data-table/data-table.component';
 
 @Component({
   selector: 'app-action-panel',
   templateUrl: './action-panel.component.html',
-  styleUrls: ['./action-panel.component.scss']
+  styleUrls: ['./action-panel.component.scss'],
 })
 
 
 export class ActionPanelComponent implements OnInit {
+  @ViewChild(DataTableComponent) dataTableComponentInstance:DataTableComponent;
   @ViewChild('canvasWrapper') canvasWrapper: ElementRef;
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   ctx: any;
@@ -25,13 +27,15 @@ export class ActionPanelComponent implements OnInit {
   movingObjSize: number = 10;
   markersRadius: number = 8;
   private subscription: Subscription;
-
+  animationReques?:number;
+  name:string;
   constructor() { }
 
   startConnection = () => {
     this.hubConnection = new SignalR.HubConnectionBuilder()
       .withUrl("https://localhost:44332/points")
       .build();
+      this.removeAllMarkers();
       this.deleteMarkerListener();
     this.initMarkers();
     this.newMarkerListener();
@@ -44,9 +48,19 @@ export class ActionPanelComponent implements OnInit {
   //Hub methods
   newMarkerListener() {
     this.hubConnection.on("GetNewMarker", (marker: Marker) => {
-      let newMarker = new Marker(marker.x, marker.y, marker.radius,marker.creatorName, marker.id);
+      let newMarker = new Marker(marker.x, marker.y, marker.radius,marker.name, marker.id);
       this.markersArray.push(newMarker);
       this.createPoint(newMarker);
+      this.refreshDataTable();  
+    });;
+  }
+
+  removeAllMarkers() {
+    this.hubConnection.on("RemoveAllMarkers", () => {
+      this.markersArray = [];
+      this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+      cancelAnimationFrame(this.animationReques);
+      this.refreshDataTable();
     });;
   }
 
@@ -56,10 +70,12 @@ export class ActionPanelComponent implements OnInit {
       if (this.markersArray.length <= 1) {
         this.movingObject = null;
         if (this.markersArray.length == 0) {
+          cancelAnimationFrame(this.animationReques);
           this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
         }
       }
       this.restoreLinks();
+      this.refreshDataTable();
     });;
   }
 
@@ -87,8 +103,8 @@ export class ActionPanelComponent implements OnInit {
   }
 
   onResize() {
-    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth;
-    this.canvas.nativeElement.height = this.canvasWrapper.nativeElement.offsetHeight ;
+    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth*0.5;
+    this.canvas.nativeElement.height = 700 ;
   }
 
   ngOnInit(): void {
@@ -101,31 +117,26 @@ export class ActionPanelComponent implements OnInit {
 
   deleteMarker(number:number){
     let marker = this.markersArray.filter(m => m.id === number)[0];
-    //if (this.markersArray.indexOf(marker) == this.markersArray.length - 1) {
-    //  this.markersArray[this.markersArray.length - 2].nextMarker = undefined;
-    //}
     this.hubConnection.invoke("DeleteMarker", marker);
   }
 
   ngAfterViewInit() {
-    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth;
-    this.canvas.nativeElement.height = this.canvasWrapper.nativeElement.offsetHeight ;
+    this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth*0.5;
+    this.canvas.nativeElement.height = 500   ;
 
   }
 
   onmousedownHandler(event: MouseEvent) {
-    var marker = new Marker(event.offsetX, event.offsetY, this.markersRadius);
-    // this.markersArray.push(marker);
-    // this.createPoint(marker);
+    var marker = new Marker(event.offsetX, event.offsetY, this.markersRadius,this.name);
     let passMark = marker;
     passMark.nextMarker = undefined;
     this.hubConnection.invoke("GetNewMarker", passMark);
+    this.refreshDataTable();
   }
 
   createPoint = (marker: Marker) => {
     if (this.markersArray.length > 1) {
       this.markersArray[this.markersArray.length - 2].nextMarker = marker;
-      //marker.nextMarker = this.markersArray[this.markersArray.length - 1];
     }
 
     if (this.markersArray.length == 2) {
@@ -136,7 +147,6 @@ export class ActionPanelComponent implements OnInit {
       this.drawCirclePoint(this.movingObject, this.movingObjStrokeColor);
       this.update();
     }
-    //addPointToTable(point);
     this.drawCirclePoint(marker, this.markerStrokeColor);
   }
 
@@ -147,7 +157,7 @@ export class ActionPanelComponent implements OnInit {
     }
     this.drawCirclePoint(this.movingObject, this.movingObjStrokeColor);
     this.StartMove();
-    requestAnimationFrame(this.update.bind(this));
+    this.animationReques = requestAnimationFrame(this.update.bind(this));
   }
 
   StartMove() {
@@ -176,5 +186,14 @@ export class ActionPanelComponent implements OnInit {
     this.ctx.arc(marker.x, marker.y, marker.radius, 0, Math.PI * 2, false);
     this.ctx.strokeStyle = strokeStyle ?? "#819830";
     this.ctx.stroke();
+  }
+
+  remooveAllMarkers(){
+    this.hubConnection.invoke("RemoveAllMarkers");
+  }
+
+  refreshDataTable()
+  {
+    this.dataTableComponentInstance.refreshTable();
   }
 }

@@ -1,22 +1,30 @@
 .full-width-table {
-  width: 70%;
+  
 }
 
-span.badge{
-  padding: 0 1em;
-  font-size: 1em;
-}
-
-span.creator-name{
-  padding-left:1em;
-  font-size: 1.2em;
-}
 .table-container{
-  margin-top: 50px;
-  width: 500px;
-  li{
-    margin: 10px 0;
-    display: flex;
-    justify-content: space-between;
-  }
+  margin-bottom: 50px;
+}
+
+// span.badge{
+//   padding: 0 1em;
+//   font-size: 1em;
+// }
+
+// span.creator-name{
+//   padding-left:1em;
+//   font-size: 1.2em;
+// }
+// .table-container{
+//   margin-top: 50px;
+//   width: 500px;
+//   li{
+//     margin: 10px 0;
+//     display: flex;
+//     justify-content: space-between;
+//   }
+// }
+
+table{
+  width: 100%;
 }

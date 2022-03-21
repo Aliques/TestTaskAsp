@@ -1,5 +1,8 @@
 import {  Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Sort } from '@angular/material/sort';
 import { Marker } from '../data/models/Marker';
+import * as lodash from "lodash"
+import { HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'app-data-table',
@@ -7,14 +10,49 @@ import { Marker } from '../data/models/Marker';
   styleUrls: ['./data-table.component.scss']
 })
 export class DataTableComponent implements OnInit {
-  @Input() markers: Marker[];
+  @Input() dataSource: Marker[];
   @Output() deleteMarkerEvent = new EventEmitter<number>();
-  constructor() {
+  @Output() dataSourceChange = new EventEmitter<Marker[]>();
+
+  onDataSourceChange(dataSource: Marker[]){
+         
+    this.dataSource = dataSource;
+    this.dataSourceChange.emit(dataSource);
+}
+
+  displayedColumns = ["id", "x", "y","name","creationTime", "Actions"];
+  constructor(private http: HttpClient) {
+  }
+  tableSortChange(sortState: Sort)
+  {
+    switch (sortState.active) {
+     case "name":
+       this.dataSource = sortState.direction === "asc" ? 
+       lodash.orderBy(this.dataSource,['name'],['asc']) : 
+       lodash.orderBy(this.dataSource,['name'],['desc']);
+       break;
+      case "creationTime":
+        
+        this.dataSource = sortState.direction === "asc" ? lodash.orderBy(this.dataSource,['creationTime'],['asc']) : 
+        lodash.orderBy(this.dataSource,['creationTime'],['desc']);
+        break;
+     default:
+    }
   }
   
-  delete(id:any){
+  deleteMarker(id:number)
+  {
     this.deleteMarkerEvent.emit(id);
   }
+
+  delete(id:any){
+    
+  }
   ngOnInit(): void {
+    
+  }
+
+  refreshTable() {
+    this.http.get('/Markers').subscribe((data:any) => this.dataSource=data);
   }
 }

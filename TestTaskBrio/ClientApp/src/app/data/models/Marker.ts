@@ -6,13 +6,14 @@ export class Marker implements ICircle {
     y: number;
     radius: number;
     nextMarker: any;
-    creatorName?:string;
+    name?:string;
+    creationTime:Date;
 
-    constructor(x: number, y: number, radius: number, creatorName?:string,id?:number) {
+    constructor(x: number, y: number, radius: number, name?:string,id?:number) {
         this.x = x;
         this.y = y;
         this.radius = radius;
-        this.creatorName = creatorName;
+        this.name = name;
         this.id = id;
     }
 }

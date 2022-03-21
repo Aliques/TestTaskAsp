@@ -1,4 +1,6 @@
-﻿namespace TestTaskBrio.Domain.Core
+﻿using System;
+
+namespace TestTaskBrio.Domain.Core
 {
     public class Marker
     {
@@ -8,5 +10,6 @@
         public float Y { get; set; }
         public int Radius { get; set; }
         public Marker NextMarker { get; set; }
+        public DateTimeOffset CreationTime { get; set; } = DateTimeOffset.UtcNow;
     }
 }
