@@ -6,6 +6,7 @@ import { ICircle } from '../data/models/ICircle';
 import { Subscription } from 'rxjs';
 import { DataTableComponent } from '../data-table/data-table.component';
 import { HttpClient } from '@angular/common/http';
+import { style } from '@angular/animations';
 
 @Component({
   selector: 'app-action-panel',
@@ -18,18 +19,25 @@ export class ActionPanelComponent implements OnInit {
   @ViewChild(DataTableComponent) dataTableComponentInstance: DataTableComponent;
   @ViewChild('canvasWrapper') canvasWrapper: ElementRef;
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild('file', { static: true }) file: ElementRef<HTMLInputElement>;
+  @ViewChild('fileName', { static: true }) fileName: ElementRef<HTMLLabelElement>;
+  @ViewChild('uploadBtn', { static: true }) uploadBtn: ElementRef<HTMLButtonElement>;
+
   ctx: any;
-  markersArray: Marker[] = [];
-  currentTarget: Marker;
-  selectedMarker:Marker = null;
-  movingObject: MovingObject;
+  markersArray: Marker[] = [];  //main markers array
+  currentTarget: Marker;        //current target
+  selectedMarker: Marker = null; // selected marker in table
+  movingObject: MovingObject;   // main moving object
   hubConnection: SignalR.HubConnection;
+  markersfromFile: Marker[] = [];
+
+  //graphics settings
   movingObjStrokeColor: string = "#0080E7";
   markerStrokeColor: string = "#9254cd";
   movingObjSize: number = 10;
   markersRadius: number = 8;
   private subscription: Subscription;
-  animationReques?: number;
+  animationReques?: number;   //animation cancelation (like cancelation token)
   name: string;
   constructor(private http: HttpClient) { }
 
@@ -62,7 +70,19 @@ export class ActionPanelComponent implements OnInit {
       this.markersArray = [];
       this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
       cancelAnimationFrame(this.animationReques);
+      if(this.markersfromFile.length){
+        this.markersArray = this.markersfromFile;
+        let firstMarker = this.markersArray[0];
+        this.movingObject = new MovingObject(firstMarker.x, firstMarker.y, 10);
+        this.currentTarget = this.markersArray[1];
+        this.restoreLinks();
+        this.update();
+        this.refreshDataTable();
+        this.markersfromFile = [];
+        return;
+      }
       this.refreshDataTable();
+      this.markersfromFile = [];
     });;
   }
 
@@ -207,16 +227,69 @@ export class ActionPanelComponent implements OnInit {
     this.dataTableComponentInstance.refreshTable();
   }
 
-  selectedTableMarker(marker:Marker){
-    this.selectedMarker = new Marker(marker.x,marker.y, 16, null,marker.id);
+  selectedTableMarker(marker: Marker) {
+    this.selectedMarker = new Marker(marker.x, marker.y, 16, null, marker.id);
   }
 
-  drawSelectedTableMarker(){
-    if(this.selectedMarker!==null)
-      this.drawCirclePoint(this.selectedMarker,"#007acc");
+  drawSelectedTableMarker() {
+    if (this.selectedMarker !== null)
+      this.drawCirclePoint(this.selectedMarker, "#007acc");
   }
 
-  tableRowUnselectedSelectedEvent(){
+  tableRowUnselectedSelectedEvent() {
     this.selectedMarker = null;
   }
+
+
+  serializationMarkersArray() {
+    let data = JSON.stringify(this.markersArray, ["id", "x", "y", "radius", "name", "creationTime"]);
+    let blob = new Blob([data], { type: "text/plain" });
+    let downloadLink = document.createElement("a")
+    downloadLink.setAttribute("href", URL.createObjectURL(blob));
+    downloadLink.setAttribute("download", Date.now() + "data.txt");
+    downloadLink.click();
+  }
+
+  fileUploaded(event: any) {
+    if (this.file.nativeElement.files.length) {
+      this.file.nativeElement.files = event.target.files;
+      let file = this.file.nativeElement.files[0];
+      const fileSize = (file.size / 1024).toFixed(2);
+      const fileNameAndSize = `${file.name} - ${fileSize}KB`;
+      this.fileName.nativeElement.textContent = fileNameAndSize;
+      this.fileName.nativeElement.style.fontSize = "10px";
+      this.fileName.nativeElement.style.textAlign = "center";
+      console.log(this.uploadBtn)
+    } 
+  }
+
+  initFromFile(data: any) {
+    let markers: Marker[] = JSON.parse(data);
+
+    if (!markers.length) {
+      alert("No data! :(")
+      return;
+    }
+    this.markersfromFile = markers;
+    this.hubConnection.invoke("RemoveAllMarkers");
+    
+  }
+
+
+  uploadBtnClick() {
+    if (this.file.nativeElement.files.length) {
+      let reader = new FileReader();
+      reader.readAsText(this.file.nativeElement.files[0]);
+
+      reader.onload = () => {
+        this.initFromFile(reader.result);
+      };
+      let a = 0;
+      reader.onerror = function () {
+        console.log(reader.error);
+      };
+    }
+  }
+
+
 }
