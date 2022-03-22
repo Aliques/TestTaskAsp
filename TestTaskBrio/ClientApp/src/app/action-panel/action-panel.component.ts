@@ -112,6 +112,10 @@ export class ActionPanelComponent implements OnInit {
       this.markersArray = this.markersArray.filter(m => m.id !== deleted.id);
       this.restoreLinks();
       this.refreshDataTable();
+      if (this.markersArray.length == 0) {
+        cancelAnimationFrame(this.animationReques);
+        this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+      }
     });
   }
 
@@ -159,18 +163,18 @@ export class ActionPanelComponent implements OnInit {
   }
 
   deleteMarker(number: number) {
+  
     let marker = this.markersArray.filter(m => m.id === number)[0];
+    this.markersArray = this.markersArray.filter(m => m.id !== marker.id);
+    this.refreshDataTable();
+    this.restoreLinks();
+    if (this.markersArray.length == 0) {
+      cancelAnimationFrame(this.animationReques);
+      this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    }
     this.http.delete('/Markers', { body: marker })
         .subscribe((result: any) => {
-          this.markersArray = this.markersArray.filter(m => m.id !== marker.id);
-          if (this.markersArray.length <= 1) {
-            this.movingObject = null;
-            if (this.markersArray.length == 0) {
-              cancelAnimationFrame(this.animationReques);
-              this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-            }
-          }
-          this.restoreLinks();
+          
           this.refreshDataTable();
         },
           response => {
