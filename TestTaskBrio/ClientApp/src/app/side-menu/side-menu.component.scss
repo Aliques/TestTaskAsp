@@ -3,7 +3,7 @@
     display: flex;
     justify-content: flex-start;
     width: 45px;
-    padding: 10px 0px 0px 10px;
+    padding: 10px 0px 0px 45px;
     top: 0;
     height: 100%;
     z-index: 100;
@@ -36,4 +36,12 @@
 .nav_wrapper:hover + #overlay {
     visibility: visible;
     opacity: 1;
+}
+
+.input-group{
+    label{
+        margin-right: 10px;
+        color: lightgoldenrodyellow;
+        align-self: center;
+    }
 }

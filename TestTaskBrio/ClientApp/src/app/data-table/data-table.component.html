@@ -1,0 +1,52 @@
+<div class="table-container" ng-hide="true">
+  <table mat-table [dataSource]="dataSource" matSort (matSortChange)="tableSortChange($event)" class="mat-elevation-z8">
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>
+        Id
+      </th>
+      <td mat-cell *matCellDef="let marker"> {{marker.id}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="x">
+      <th mat-header-cell *matHeaderCellDef>
+        X
+      </th>
+      <td mat-cell *matCellDef="let marker"> {{marker.x}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="y">
+      <th mat-header-cell *matHeaderCellDef>
+        Y
+      </th>
+      <td mat-cell *matCellDef="let marker"> {{marker.y}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by name">
+        Name
+      </th>
+      <td mat-cell *matCellDef="let marker"> {{marker.name}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="creationTime">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by creation time">
+        Creation time
+      </th>
+      <td mat-cell *matCellDef="let marker"> {{marker.creationTime | date:'HH:mm:ss'}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Actions">
+      <th mat-header-cell *matHeaderCellDef>
+        Creation time
+      </th>
+      <td mat-cell *matCellDef="let marker"> <button (click)="deleteMarker(marker.id)"
+          class="btn btn-danger">Delete</button> </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row  *matRowDef="let row; columns: displayedColumns;" [ngClass]="{'make-gold': row.id == selecterMarkerId }"
+     (mouseenter)="tableRowSelected(row)"
+      (mouseleave)="tableRowUnselected()"></tr>
+  </table>
+</div>

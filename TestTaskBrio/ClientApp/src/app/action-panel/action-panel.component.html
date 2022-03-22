@@ -1,3 +1,30 @@
-<div id="canvas-wrapper"  #canvasWrapper >
-    <canvas (click)="onmousedownHandler($event)" id="canvas" #canvas></canvas>
+<div id="canvas-wrapper" #canvasWrapper (window:resize)="onResize()">
+    <div class="canvas-group">
+        <div class="name-container">
+            <label>Имя</label>
+            <input type="text" [(ngModel)]="name" />
+        </div>
+        <canvas (click)="onmousedownHandler($event)" id="canvas" #canvas></canvas>
+        <div class="button-group">
+            <div>
+                <button type="button" class="btn btn-danger" (click)="remooveAllMarkers()">Remove all</button>
+                <button type="button" class="btn btn-success" (click)="serializationMarkersArray()">Save</button>
+            </div>
+            <div class="button-group">
+            <div class="file-input">
+                <input #file type="file" (change)="fileUploaded($event)" id="file" class="file">
+                <label for="file" #fileName>
+                  Select file
+                  <p class="file-name"></p>
+                </label>
+              </div>
+            <button type="button" (click)="uploadBtnClick()" #uploadBtn class="btn btn-success">Upload</button>
+        </div>
+        </div>
+    </div>
+    <div class="table-group">
+        <app-data-table (tableRowUnselectedSelectedEvent)="tableRowUnselectedSelectedEvent()"
+            (tableRowSelectedEvent)="selectedTableMarker($event)" (deleteMarkerEvent)="deleteMarker($event)"
+            [dataSource]="markersArray"></app-data-table>
+    </div>
 </div>
