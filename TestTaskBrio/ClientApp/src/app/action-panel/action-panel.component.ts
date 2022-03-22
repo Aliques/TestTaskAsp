@@ -59,7 +59,7 @@ export class ActionPanelComponent implements OnInit {
 
   startConnection = () => {
     this.hubConnection = new SignalR.HubConnectionBuilder()
-      .withUrl("https://localhost:44332/points")
+      .withUrl("/points")
       .build();
     this.removeAllMarkers();
     this.deleteMarkerListener();
