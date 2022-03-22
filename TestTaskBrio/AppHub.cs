@@ -27,11 +27,18 @@ namespace TestTaskBrio
             await base.OnConnectedAsync();
         }
 
+        public async Task UpdateMarkers()
+        {
+            var result = await _markerRepository.FindAllAsync();
+            await Clients.All.SendAsync("UpdateMarkers", result);
+            await base.OnConnectedAsync();
+        }
+
         public async Task DeleteMarker(Marker marker)
         {
             //_markerRepository.Delete(marker);
             //await _markerRepository.SaveChangesAsync();
-            await Clients.All.SendAsync("DeleteMarker", marker);
+            await Clients.Others.SendAsync("DeleteMarker", marker);
             await base.OnConnectedAsync();
         }
 

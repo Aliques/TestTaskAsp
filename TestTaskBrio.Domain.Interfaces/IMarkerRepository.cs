@@ -10,7 +10,7 @@ namespace TestTaskBrio.Domain.Interfaces
         int Delete(Marker marker);
         Task<List<Marker>> FindAllAsync();
         Task<int> SaveChangesAsync();
-
         Task<int> RemoveAll();
+        void CreateMarkers(List<Marker> markers);
     }
 }

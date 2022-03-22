@@ -33,7 +33,7 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header sortActionDescription="Sort by creation time">
         Creation time
       </th>
-      <td mat-cell *matCellDef="let marker"> {{marker.creationTime | date:'HH:mm:ss yyyy-MM-dd'}} </td>
+      <td mat-cell *matCellDef="let marker"> {{marker.creationTime | date:'HH:mm:ss'}} </td>
     </ng-container>
 
     <ng-container matColumnDef="Actions">

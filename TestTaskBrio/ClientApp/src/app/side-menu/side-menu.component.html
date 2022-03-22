@@ -1,6 +1,9 @@
 <nav class="nav_wrapper">
     <div class="nav__content">
-        <input  type="number" min="1" max="500" value="200" id="speed" />
+        <div class="input-group">
+            <label>Marker radius:</label>
+            <input (change)="speedChanged()" [(ngModel)]="movingObjectSpeedValue" type="number" min="1" max="200" />
+    </div>
     </div>
 </nav>
 <div id="overlay"></div>

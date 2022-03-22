@@ -26,7 +26,7 @@ import { HttpClientModule }   from '@angular/common/http';
     MatPaginatorModule,
     MatSortModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

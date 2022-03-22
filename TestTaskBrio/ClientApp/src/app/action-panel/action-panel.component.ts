@@ -5,13 +5,16 @@ import * as SignalR from "@microsoft/signalr"
 import { ICircle } from '../data/models/ICircle';
 import { Subscription } from 'rxjs';
 import { DataTableComponent } from '../data-table/data-table.component';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { style } from '@angular/animations';
+import * as moment from 'moment';
+import { SettingService } from '../data/services/SettingService'
 
 @Component({
   selector: 'app-action-panel',
   templateUrl: './action-panel.component.html',
   styleUrls: ['./action-panel.component.scss'],
+  providers: [SettingService]
 })
 
 
@@ -32,14 +35,27 @@ export class ActionPanelComponent implements OnInit {
   markersfromFile: Marker[] = [];
 
   //graphics settings
+  strokeStyle?: string | CanvasGradient | CanvasPattern ="#9254cd";
   movingObjStrokeColor: string = "#0080E7";
-  markerStrokeColor: string = "#9254cd";
   movingObjSize: number = 10;
   markersRadius: number = 8;
+  selectedMarkerRadius:number = 16;
+  movingObjectSpeed:number = 10;
   private subscription: Subscription;
   animationReques?: number;   //animation cancelation (like cancelation token)
   name: string;
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private readonly settingService: SettingService) { }
+  
+  ngOnInit(): void {
+    this.ctx = this.canvas.nativeElement.getContext('2d');
+    this.startConnection();
+    this.speedChanged();
+  }
+
+  speedChanged( ): void{
+    this.subscription = this.settingService.getMovingObjectSpeedValue().subscribe(msg => console.log(msg));
+  
+  }
 
   startConnection = () => {
     this.hubConnection = new SignalR.HubConnectionBuilder()
@@ -49,6 +65,7 @@ export class ActionPanelComponent implements OnInit {
     this.deleteMarkerListener();
     this.initMarkers();
     this.newMarkerListener();
+    this.updateMarkers();
     this.hubConnection
       .start()
       .then(() => console.log("started"))
@@ -58,7 +75,7 @@ export class ActionPanelComponent implements OnInit {
   //Hub methods
   newMarkerListener() {
     this.hubConnection.on("GetNewMarker", (marker: Marker) => {
-      let newMarker = new Marker(marker.x, marker.y, marker.radius, marker.name, marker.id);
+      let newMarker = new Marker(marker.x, marker.y, marker.name, marker.id);
       this.markersArray.push(newMarker);
       this.createPoint(newMarker);
       this.refreshDataTable();
@@ -72,52 +89,51 @@ export class ActionPanelComponent implements OnInit {
       cancelAnimationFrame(this.animationReques);
       if(this.markersfromFile.length){
         this.markersArray = this.markersfromFile;
-        let firstMarker = this.markersArray[0];
-        this.movingObject = new MovingObject(firstMarker.x, firstMarker.y, 10);
-        this.currentTarget = this.markersArray[1];
-        this.restoreLinks();
-        this.update();
-        this.refreshDataTable();
-        this.markersfromFile = [];
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+        let body = JSON.stringify(this.markersArray, ["x", "y", "name", "creationTime"]);
+        this.http.post('/Markers/createMarkers', body ,{
+          headers: new HttpHeaders().set('Content-Type', 'application/json; charset=utf8')
+        })
+        .subscribe((data:any) => {
+          this.hubConnection.invoke("UpdateMarkers");
+          this.markersfromFile = [];
+
+        },error=>console.log(error));
         return;
       }
       this.refreshDataTable();
       this.markersfromFile = [];
-    });;
+    });
   }
 
   deleteMarkerListener() {
     this.hubConnection.on("DeleteMarker", (deleted: Marker) => {
-      let id = deleted.id;
+      this.markersArray = this.markersArray.filter(m => m.id !== deleted.id);
+      this.restoreLinks();
+      this.refreshDataTable();
+    });
+  }
 
-      this.http.delete('/Markers', { body: deleted })
-        .subscribe((result: any) => {
-          this.markersArray = this.markersArray.filter(m => m.id !== id);
-          if (this.markersArray.length <= 1) {
-            this.movingObject = null;
-            if (this.markersArray.length == 0) {
-              cancelAnimationFrame(this.animationReques);
-              this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-            }
-          }
-          this.restoreLinks();
-          this.refreshDataTable();
-        },
-          response => {
-            console.log("DELETE call in error", response);
-          });
-    });;
+  refreshData(array:Marker[]){
+    if (array.length) {
+      this.markersArray = array;
+      this.movingObject = new MovingObject(this.markersArray[0].x, this.markersArray[0].y, this.movingObjSize,this.movingObjectSpeed);
+
+      this.restoreLinks();
+      this.update();
+    }
   }
 
   initMarkers() {
     this.hubConnection.on("GetAllMarkers", (array: Marker[]) => {
-      if (array.length) {
-        this.markersArray = array;
-        this.movingObject = new MovingObject(this.markersArray[0].x, this.markersArray[0].y, this.movingObjSize);
+        this.refreshData(array);
+    });
+  }
 
-        this.restoreLinks();
-        this.update();
-      }
+  updateMarkers() {
+    this.hubConnection.on("UpdateMarkers", (array: Marker[]) => {
+      this.refreshData(array);
     });
   }
 
@@ -137,16 +153,29 @@ export class ActionPanelComponent implements OnInit {
     this.canvas.nativeElement.height = 700;
   }
 
-  ngOnInit(): void {
-    this.ctx = this.canvas.nativeElement.getContext('2d');
-    this.startConnection();
-  }
+  
   ngOnDestroy() {
     this.subscription.unsubscribe();
   }
 
   deleteMarker(number: number) {
     let marker = this.markersArray.filter(m => m.id === number)[0];
+    this.http.delete('/Markers', { body: marker })
+        .subscribe((result: any) => {
+          this.markersArray = this.markersArray.filter(m => m.id !== marker.id);
+          if (this.markersArray.length <= 1) {
+            this.movingObject = null;
+            if (this.markersArray.length == 0) {
+              cancelAnimationFrame(this.animationReques);
+              this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+            }
+          }
+          this.restoreLinks();
+          this.refreshDataTable();
+        },
+          response => {
+            console.log("DELETE call in error", response);
+          });
     this.hubConnection.invoke("DeleteMarker", marker);
   }
 
@@ -157,7 +186,7 @@ export class ActionPanelComponent implements OnInit {
   }
 
   onmousedownHandler(event: MouseEvent) {
-    var marker = new Marker(event.offsetX, event.offsetY, this.markersRadius, this.name);
+    var marker = new Marker(event.offsetX, event.offsetY, this.name);
     let passMark = marker;
     passMark.nextMarker = undefined;
     this.hubConnection.invoke("GetNewMarker", passMark);
@@ -171,21 +200,24 @@ export class ActionPanelComponent implements OnInit {
 
     if (this.markersArray.length == 2) {
       this.currentTarget = marker;
-      this.movingObject = new MovingObject(this.markersArray[this.markersArray.length - 2].x, this.markersArray[this.markersArray.length - 2].y, this.movingObjSize);
-      this.movingObject.dx = 8;
-      this.movingObject.dy = 8;
-      this.drawCirclePoint(this.movingObject, this.movingObjStrokeColor);
+      this.movingObject = new MovingObject(this.markersArray[this.markersArray.length - 2].x, 
+        this.markersArray[this.markersArray.length - 2].y, this.movingObjSize,this.movingObjectSpeed);
+      this.movingObject.dx = this.movingObjectSpeed;
+      this.movingObject.dy = this.movingObjectSpeed;
+      this.drawCirclePoint(this.movingObject, this.markersRadius, this.movingObjStrokeColor);
       this.update();
     }
-    this.drawCirclePoint(marker, this.markerStrokeColor);
+    this.drawCirclePoint(marker, this.markersRadius, this.strokeStyle);
   }
 
   update() {
     this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.movingObject.dx=this.movingObjectSpeed;
+    this.movingObject.dy=this.movingObjectSpeed;
     for (var i = 0; i < this.markersArray.length; i++) {
-      this.drawCirclePoint(this.markersArray[i], this.markerStrokeColor);
+      this.drawCirclePoint(this.markersArray[i], this.markersRadius, this.strokeStyle);
     }
-    this.drawCirclePoint(this.movingObject, this.movingObjStrokeColor);
+    this.drawCirclePoint(this.movingObject, this.markersRadius, this.movingObjStrokeColor);
     this.StartMove();
     this.drawSelectedTableMarker();
     this.animationReques = requestAnimationFrame(this.update.bind(this));
@@ -206,15 +238,15 @@ export class ActionPanelComponent implements OnInit {
       const opp = this.currentTarget.y - mObj.y;
       const adj = this.currentTarget.x - mObj.x;
       const angle = Math.atan2(opp, adj);
-      this.movingObject.x += (Math.cos(angle) * mObj.dx);
-      this.movingObject.y += (Math.sin(angle) * mObj.dy);
+      this.movingObject.x += ((Math.cos(angle) * mObj.dx) * (this.movingObjectSpeed*0.1));
+      this.movingObject.y += ((Math.sin(angle) * mObj.dy) * (this.movingObjectSpeed * 0.1));
 
     }
   }
 
-  drawCirclePoint(marker: ICircle, strokeStyle?: string | CanvasGradient | CanvasPattern) {
+  drawCirclePoint(marker: ICircle, radius:number, strokeStyle?: string | CanvasGradient | CanvasPattern) {
     this.ctx.beginPath();
-    this.ctx.arc(marker.x, marker.y, marker.radius, 0, Math.PI * 2, false);
+    this.ctx.arc(marker.x, marker.y, radius, 0, Math.PI * 2, false);
     this.ctx.strokeStyle = strokeStyle ?? "#819830";
     this.ctx.stroke();
   }
@@ -228,12 +260,12 @@ export class ActionPanelComponent implements OnInit {
   }
 
   selectedTableMarker(marker: Marker) {
-    this.selectedMarker = new Marker(marker.x, marker.y, 16, null, marker.id);
+    this.selectedMarker = new Marker(marker.x, marker.y, null, marker.id);
   }
 
   drawSelectedTableMarker() {
     if (this.selectedMarker !== null)
-      this.drawCirclePoint(this.selectedMarker, "#007acc");
+      this.drawCirclePoint(this.selectedMarker, this.selectedMarkerRadius, "#007acc");
   }
 
   tableRowUnselectedSelectedEvent() {
@@ -242,7 +274,8 @@ export class ActionPanelComponent implements OnInit {
 
 
   serializationMarkersArray() {
-    let data = JSON.stringify(this.markersArray, ["id", "x", "y", "radius", "name", "creationTime"]);
+    Date.prototype.toJSON = function(){ return moment(this).format(); }
+    let data = JSON.stringify(this.markersArray, ["x", "y", "name", "creationTime"]);
     let blob = new Blob([data], { type: "text/plain" });
     let downloadLink = document.createElement("a")
     downloadLink.setAttribute("href", URL.createObjectURL(blob));
@@ -254,8 +287,8 @@ export class ActionPanelComponent implements OnInit {
     if (this.file.nativeElement.files.length) {
       this.file.nativeElement.files = event.target.files;
       let file = this.file.nativeElement.files[0];
-      const fileSize = (file.size / 1024).toFixed(2);
-      const fileNameAndSize = `${file.name} - ${fileSize}KB`;
+      console.log(file)
+      const fileNameAndSize = `${file.name}`;
       this.fileName.nativeElement.textContent = fileNameAndSize;
       this.fileName.nativeElement.style.fontSize = "10px";
       this.fileName.nativeElement.style.textAlign = "center";
@@ -277,6 +310,7 @@ export class ActionPanelComponent implements OnInit {
 
 
   uploadBtnClick() {
+    this.movingObjectSpeed+=1;
     if (this.file.nativeElement.files.length) {
       let reader = new FileReader();
       reader.readAsText(this.file.nativeElement.files[0]);
@@ -290,6 +324,15 @@ export class ActionPanelComponent implements OnInit {
       };
     }
   }
-
+  dateTimeReviver(key:any, value:any) {
+    var a;
+    if (typeof value === 'string') {
+        a = /\/Date\((\d*)\)\//.exec(value);
+        if (a) {
+            return new Date(+a[1]);
+        }
+    }
+    return value;
+}
 
 }

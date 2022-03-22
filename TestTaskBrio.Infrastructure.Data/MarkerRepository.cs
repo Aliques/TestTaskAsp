@@ -46,5 +46,13 @@ namespace TestTaskBrio.Infrastructure.Data
         {
             return await _repositoryContext.SaveChangesAsync();
         }
+
+        public void CreateMarkers(List<Marker> markers)
+        {
+            foreach (var marker in markers)
+            {
+                _repositoryContext.Markers.Add(marker);
+            }
+        }
     }
 }

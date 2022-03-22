@@ -44,10 +44,19 @@ namespace TestTaskBrio.Controllers
             return id;
         }
 
-        [HttpDelete("/all")]
+        [HttpDelete("all")]
         public async Task<IActionResult> DeleteAll()
         {
             var result = await _markerRepository.RemoveAll();
+
+            return Ok();
+        }
+
+        [HttpPost("createMarkers")]
+        public async Task<IActionResult> CreateMarkers([FromBody] List<Marker> markers)
+        {
+            _markerRepository.CreateMarkers(markers);
+            await _markerRepository.SaveChangesAsync();
 
             return Ok();
         }
