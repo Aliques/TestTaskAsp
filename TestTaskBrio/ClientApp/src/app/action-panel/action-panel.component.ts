@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, Input, Output, HostListener } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MovingObject } from '../data/models/MovingObject';
 import { Marker } from '../data/models/Marker';
 import * as SignalR from "@microsoft/signalr"
@@ -6,7 +6,6 @@ import { ICircle } from '../data/models/ICircle';
 import { Subscription } from 'rxjs';
 import { DataTableComponent } from '../data-table/data-table.component';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { style } from '@angular/animations';
 import * as moment from 'moment';
 import { SettingService } from '../data/services/SettingService'
 
@@ -14,7 +13,6 @@ import { SettingService } from '../data/services/SettingService'
   selector: 'app-action-panel',
   templateUrl: './action-panel.component.html',
   styleUrls: ['./action-panel.component.scss'],
-  providers: [SettingService]
 })
 
 
@@ -40,20 +38,26 @@ export class ActionPanelComponent implements OnInit {
   movingObjSize: number = 10;
   markersRadius: number = 8;
   selectedMarkerRadius:number = 16;
-  movingObjectSpeed:number = 10;
+  movingObjectSpeed:number ;
   private subscription: Subscription;
   animationReques?: number;   //animation cancelation (like cancelation token)
   name: string;
-  constructor(private http: HttpClient, private readonly settingService: SettingService) { }
+  constructor(private http: HttpClient, private  settingService: SettingService) {
+    this.settingsChanged();
+
+   }
   
   ngOnInit(): void {
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.startConnection();
-    this.speedChanged();
   }
 
-  speedChanged( ): void{
-    this.subscription = this.settingService.getMovingObjectSpeedValue().subscribe(msg => console.log(msg));
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  settingsChanged(): void{
+    this.subscription = this.settingService.data.subscribe(value => this.movingObjectSpeed = value);
   
   }
 
@@ -155,11 +159,6 @@ export class ActionPanelComponent implements OnInit {
   onResize() {
     this.canvas.nativeElement.width = this.canvasWrapper.nativeElement.offsetWidth * 0.5;
     this.canvas.nativeElement.height = 700;
-  }
-
-  
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
   }
 
   deleteMarker(number: number) {

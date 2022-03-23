@@ -11,6 +11,7 @@ import { MatSortModule } from '@angular/material/sort';
 import { DataTableComponent } from './data-table/data-table.component';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule }   from '@angular/common/http';
+import { SettingService } from './data/services/SettingService';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,7 @@ import { HttpClientModule }   from '@angular/common/http';
     FormsModule,
     HttpClientModule,
   ],
-  providers: [],
+  providers: [SettingService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
