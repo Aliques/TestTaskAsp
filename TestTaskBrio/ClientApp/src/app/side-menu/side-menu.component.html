@@ -2,8 +2,9 @@
     <div class="nav__content">
         <div class="input-group">
             <label>Marker radius:</label>
-            <input (change)="speedChanged()" [(ngModel)]="movingObjectSpeedValue" type="number" min="1" max="200" />
-    </div>
+            <input (change)="speedChanged($any($event.target).value)" value="{{movingObjectSpeedValue}}" type="number"
+                min="{{movingObjectSpeedMinValue}}" max="{{movingObjectSpeedMaxValue}}" />
+        </div>
     </div>
 </nav>
 <div id="overlay"></div>
