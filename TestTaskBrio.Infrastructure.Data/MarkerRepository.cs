@@ -16,6 +16,8 @@ namespace TestTaskBrio.Infrastructure.Data
         {
             _repositoryContext = repositoryContext;
         }
+        
+        //возможно лучше использовать хранимую процедуру на стороне бд
         public async Task<Marker> CreateMarker(Marker marker)
         {
             var mark = _repositoryContext.Add(marker).Entity;
