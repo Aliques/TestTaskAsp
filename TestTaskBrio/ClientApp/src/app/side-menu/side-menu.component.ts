@@ -1,4 +1,5 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { GraphicsSettings } from '../data/services/GraphicsSettings';
 import { SettingService } from '../data/services/SettingService';
 
 @Component({
@@ -8,9 +9,16 @@ import { SettingService } from '../data/services/SettingService';
 })
 export class SideMenuComponent implements OnInit {
 
-  public movingObjectSpeedValue: number = 10;
-  public movingObjectSpeedMaxValue: number = 15;
-  public movingObjectSpeedMinValue: number = 1;
+  public movingObjectSpeedValue: number = GraphicsSettings.movingObjectSpeedDefault;
+  public movingObjectSpeedMaxValue: number = GraphicsSettings.movingObjectSpeedMax;
+  public movingObjectSpeedMinValue: number = GraphicsSettings.movingObjectSpeedMin;
+
+  public movingObjectRadiusValue: number = GraphicsSettings.movingObjectRadiusDefault;
+  public movingObjectRadiusMaxValue: number = GraphicsSettings.movingObjectRadiusMax;
+  public movingObjectRadiusMinValue: number = GraphicsSettings.movingObjectRadiusMin;
+
+  public movingObjectFillColorValue: string = GraphicsSettings.movingObjectFillColorDefault;
+  public staticMarkerFillColorValue: string = GraphicsSettings.markerFillColorDefault;
 
   constructor(private readonly settingService: SettingService) { }
 
@@ -24,7 +32,7 @@ export class SideMenuComponent implements OnInit {
       this.settingService.movingObjectSpeedValue(this.movingObjectSpeedMaxValue);
       return;
     }
-    if(value<this.movingObjectSpeedMaxValue){
+    if(value<this.movingObjectRadiusMinValue){
       this.movingObjectSpeedValue = this.movingObjectSpeedMinValue;
       this.settingService.movingObjectSpeedValue(this.movingObjectSpeedMinValue);
       return;
@@ -32,4 +40,29 @@ export class SideMenuComponent implements OnInit {
     this.settingService.movingObjectSpeedValue(value);
   }
   
+
+  movingMarkerRadiusChanged(value:number){
+    if(value>this.movingObjectRadiusMaxValue)
+    {
+      this.movingObjectRadiusValue = this.movingObjectRadiusMaxValue;
+      this.settingService.movingObjectRadiusValue(this.movingObjectRadiusMaxValue);
+      return;
+    }
+    if(value<this.movingObjectRadiusMinValue){
+      this.movingObjectRadiusValue = this.movingObjectRadiusMinValue;
+      this.settingService.movingObjectRadiusValue(this.movingObjectRadiusMinValue);
+      return;
+    }
+    this.settingService.movingObjectRadiusValue(value);
+  }
+
+  movingMarkerFillColorChanged(value:string)
+  {
+    this.settingService.movingObjectFillColorValue(value);
+  }
+
+  staticMarkerFillColorChanged(value:string)
+  {
+    this.settingService.markerFillColorValue(value);
+  }
 }

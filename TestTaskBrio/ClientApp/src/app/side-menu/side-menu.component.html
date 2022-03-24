@@ -1,10 +1,24 @@
 <nav class="nav_wrapper">
     <div class="nav__content">
         <div class="input-group">
-            <label>Marker radius:</label>
+            <label>Moving marker speed:</label>
             <input (change)="speedChanged($any($event.target).value)" value="{{movingObjectSpeedValue}}" type="number"
                 min="{{movingObjectSpeedMinValue}}" max="{{movingObjectSpeedMaxValue}}" />
         </div>
+        <div class="input-group">
+            <label>Moving marker fill color:</label>
+            <input type="color" (change)="movingMarkerFillColorChanged($any($event.target).value)" value="{{movingObjectFillColorValue}}"/>
+        </div>
+        <div class="input-group">
+            <label>Moving marker radius:</label>
+            <input (change)="movingMarkerRadiusChanged($any($event.target).value)" value="{{movingObjectRadiusValue}}" type="number"
+                min="{{movingObjectRadiusMinValue}}" max="{{movingObjectRadiusMaxValue}}" />
+        </div>
+        <div class="input-group">
+            <label>Static marker fill color:</label>
+            <input type="color" (change)="staticMarkerFillColorChanged($any($event.target).value)" value="{{staticMarkerFillColorValue}}"/>
+        </div>
+       
     </div>
 </nav>
 <div id="overlay"></div>
