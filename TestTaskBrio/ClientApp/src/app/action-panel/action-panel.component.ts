@@ -8,6 +8,7 @@ import { DataTableComponent } from '../data-table/data-table.component';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as moment from 'moment';
 import { SettingService } from '../data/services/SettingService'
+import { GraphicsSettings } from '../data/services/GraphicsSettings';
 
 @Component({
   selector: 'app-action-panel',
@@ -33,21 +34,24 @@ export class ActionPanelComponent implements OnInit {
   markersfromFile: Marker[] = [];
 
   //graphics settings
-  strokeStyle?: string | CanvasGradient | CanvasPattern ="#9254cd";
-  movingObjStrokeColor: string = "#0080E7";
-  movingObjSize: number = 10;
-  markersRadius: number = 8;
+  movingObjectFillColor:string;
+  staticMarkerFillColor:string = "#00E663";
+  strokeStyle?: string ="#9254cd";
+  movingObjStrokeColor: string;
+  movingObjSize: number = GraphicsSettings.movingObjectRadiusDefault;
+  markersRadius: number;
   selectedMarkerRadius:number = 16;
-  movingObjectSpeed:number ;
+  movingObjectSpeed:number;
   private subscription: Subscription;
   animationReques?: number;   //animation cancelation (like cancelation token)
   name: string;
   constructor(private http: HttpClient, private  settingService: SettingService) {
-    this.settingsChanged();
+   
 
    }
   
   ngOnInit(): void {
+    this.settingsChanged();
     this.ctx = this.canvas.nativeElement.getContext('2d');
     this.startConnection();
   }
@@ -57,8 +61,14 @@ export class ActionPanelComponent implements OnInit {
   }
 
   settingsChanged(): void{
-    this.subscription = this.settingService.data.subscribe(value => this.movingObjectSpeed = value);
-  
+    this.movingObjectSpeed = this.settingService.getMovingObjectSpeed();
+    this.markersRadius = this.settingService.getmovingObjectRadius();
+    this.movingObjectFillColor = this.settingService.getmovingObjectFillColor();
+    this.staticMarkerFillColor = this.settingService.getmarkerFillColor();
+    this.settingService.movingObjSpeed.subscribe(value => this.movingObjectSpeed = value);
+    this.settingService.ovingObjRadius.subscribe(value => this.movingObject.radius = value);
+    this.settingService.movingObjFillColor.subscribe(value => this.movingObjectFillColor = value);
+    this.settingService.staticmarkerFillColor.subscribe(value => this.staticMarkerFillColor = value);
   }
 
   startConnection = () => {
@@ -207,10 +217,10 @@ export class ActionPanelComponent implements OnInit {
         this.markersArray[this.markersArray.length - 2].y, this.movingObjSize,this.movingObjectSpeed);
       this.movingObject.dx = this.movingObjectSpeed;
       this.movingObject.dy = this.movingObjectSpeed;
-      this.drawCirclePoint(this.movingObject, this.markersRadius, this.movingObjStrokeColor);
+      this.drawCirclePoint(this.movingObject, this.movingObject.radius, this.movingObjStrokeColor,this.movingObjectFillColor);
       this.update();
     }
-    this.drawCirclePoint(marker, this.markersRadius, this.strokeStyle);
+    this.drawCirclePoint(marker, this.markersRadius, this.strokeStyle,this.staticMarkerFillColor);
   }
 
   update() {
@@ -218,9 +228,9 @@ export class ActionPanelComponent implements OnInit {
     this.movingObject.dx=this.movingObjectSpeed;
     this.movingObject.dy=this.movingObjectSpeed;
     for (var i = 0; i < this.markersArray.length; i++) {
-      this.drawCirclePoint(this.markersArray[i], this.markersRadius, this.strokeStyle);
+      this.drawCirclePoint(this.markersArray[i], this.markersRadius, this.strokeStyle,this.staticMarkerFillColor);
     }
-    this.drawCirclePoint(this.movingObject, this.markersRadius, this.movingObjStrokeColor);
+    this.drawCirclePoint(this.movingObject, this.movingObject.radius, this.movingObjStrokeColor,this.movingObjectFillColor);
     this.StartMove();
     this.drawSelectedTableMarker();
     this.animationReques = requestAnimationFrame(this.update.bind(this));
@@ -247,10 +257,12 @@ export class ActionPanelComponent implements OnInit {
     }
   }
 
-  drawCirclePoint(marker: ICircle, radius:number, strokeStyle?: string | CanvasGradient | CanvasPattern) {
+  drawCirclePoint(marker: ICircle, radius:number, strokeStyle?: string, fill?:string) {
     this.ctx.beginPath();
     this.ctx.arc(marker.x, marker.y, radius, 0, Math.PI * 2, false);
     this.ctx.strokeStyle = strokeStyle ?? "#819830";
+    this.ctx.fillStyle = fill;
+    this.ctx.fill();
     this.ctx.stroke();
   }
 

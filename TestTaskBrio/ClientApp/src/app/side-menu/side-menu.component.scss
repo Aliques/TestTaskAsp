@@ -3,7 +3,7 @@
     display: flex;
     justify-content: flex-start;
     width: 45px;
-    padding: 10px 0px 0px 45px;
+    padding: 45px 0px 0px 45px;
     top: 0;
     height: 100%;
     z-index: 100;
@@ -11,12 +11,23 @@
     overflow: hidden;
     transition: width 0.3s ease;
     box-shadow: 4px 7px 10px rgba(0, 0, 0, 0.4);
+    
     &:hover{
         width: 400px;
     }
-}
-.nav-content {
-    margin: 10px 10px 10px 45px;
+    .nav__content{
+        opacity: 0;
+        visibility: hidden;
+        margin: 10px 10px 10px 45px;
+        -webkit-transition-property: opacity, visibility;
+        -moz-transition-property:opacity, visibility;
+        transition-property: opacity, visibility;
+        -webkit-transition-delay: 0.3s;
+        -moz-transition-delay: 0.3s;
+        transition-delay: 0.3s;
+        transition-duration: .9s, 0.1s;
+    }
+    
 }
 
 #overlay {
@@ -38,10 +49,36 @@
     opacity: 1;
 }
 
+.nav_wrapper:hover  .nav__content {
+    visibility: visible;
+    opacity: 1;
+}
+
+
 .input-group{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    width: 100%;
     label{
         margin-right: 10px;
         color: lightgoldenrodyellow;
         align-self: center;
     }
+    input{
+        width: 50px;
+    }
+}
+
+.setting-icon{
+    z-index: 3;
+    visibility: visible;
+    opacity: 1;
+    position: absolute;
+    top: 10px;
+    left: 6px;
+    color: white;
+    font-size: 30px;
+    width: 30px;
+    height: 30px;
 }
